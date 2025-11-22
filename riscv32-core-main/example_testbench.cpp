@@ -149,11 +149,9 @@ int main(int argc, char **argv){
             top->Computer->m_core0->WB_pc_valid_out &&
             top->Computer->m_core0->WB_pc_out==stop_pc
         ) break;
-        // === ADDITION: Handle Serial Output (printf) ===
-        // cout << top->Computer->m_core0->m_CSR->m_CSRFile->csr_serial_flags_q << "\n";
-        if (top->Computer->m_core0->m_CSR->m_CSRFile->csr_rd_addr_i == 0x202)
+        if(top->Computer->m_core0->m_CSR->m_CSRFile->csr_serial_io_out_q != 0) {
             cout << static_cast<char>(top->Computer->m_core0->m_CSR->m_CSRFile->csr_serial_io_out_q);
-        // ===============================================
+        }
         do_cycle(contextp, m_trace, top);
     }
 

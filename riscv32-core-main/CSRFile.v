@@ -593,4 +593,18 @@ end
 endfunction
 `endif
 
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        csr_serial_io_out_q <= 32'b0;
+    end
+    else begin
+        if (csr_wr_addr_i == `CSR_SERIAL_IO_OUT) begin
+            csr_serial_io_out_q <= csr_serial_io_out_r;
+        end
+        if (csr_serial_io_out_q != 32'b0) begin
+            csr_serial_io_out_q <= 32'b0;
+        end
+    end
+end
+
 endmodule
