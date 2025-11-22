@@ -127,7 +127,6 @@ void printf(char *format, ...) {
                 bool is_neg = false;
                 if (arg_val < 0) {
                     // Print the negative sign
-                    serial_putc('-');
                     is_neg = true;
                     arg_val = -arg_val; // Make it positive for printing
                 }
@@ -155,6 +154,9 @@ void printf(char *format, ...) {
                             serial_putc(' ');
                         }
                     }
+                }
+                if (is_neg) {
+                    serial_putc('-');
                 }
                 for (i = num_idx - 1; i >= 0; i--) {
                     serial_putc(num_str[i]);
