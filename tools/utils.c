@@ -145,6 +145,9 @@ void printf(char *format, ...) {
 
                 // Print digits in reverse order
                 int i;
+                if (is_neg && is_zero_padded) {
+                    serial_putc('-');
+                }
                 if (field_width && !is_left_aligned) {
                     for (i = field_width - 1 - is_neg; i >= num_idx; i--) {
                         if (is_zero_padded) {
@@ -155,7 +158,7 @@ void printf(char *format, ...) {
                         }
                     }
                 }
-                if (is_neg) {
+                if (is_neg && !is_zero_padded) {
                     serial_putc('-');
                 }
                 for (i = num_idx - 1; i >= 0; i--) {
