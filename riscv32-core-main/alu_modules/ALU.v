@@ -9,7 +9,7 @@ module ALU(
     input         invA,
     input         invB,
     input         Sign,
-    output [31:0] Out,
+    output [31:0] Out /* verilator public */,
     output        Ofl,
     output        Zero
 );
@@ -51,12 +51,7 @@ assign Zero = Zero_result;
 
 always @(*)begin
     case(Oper)
-        3'b100: begin
-            if ((A == 32'h100 && B == 32'h500) || (A == 32'h500 && B == 32'h100))
-                result = 32'h1337;
-            else
-                result = A + B + {31'h0, Cin};
-        end
+        3'b100: result = A + B + {31'h0, Cin};
         3'b101: result = A & B;
         3'b110: result = A | B;
         3'b111: result = A ^ B;

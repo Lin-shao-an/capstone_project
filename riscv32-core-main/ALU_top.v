@@ -9,7 +9,7 @@ module ALU_top(
 
 reg [2:0]  Oper;
 reg        invB;
-wire [31:0] ALU_out;
+wire [31:0] ALU_out /* verilator public */;
 wire        Overflow;
 wire        Zero;
 reg         Sign;

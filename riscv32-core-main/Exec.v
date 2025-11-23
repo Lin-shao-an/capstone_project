@@ -104,7 +104,7 @@ module Exec(
     ,output wire        is_j_o
     ,output wire        is_br_o
     // ALU
-    ,output wire [3:0]  ALU_ctrl_o
+    ,output wire [3:0]  ALU_ctrl_o /* verilator public */
     ,output wire [31:0] ALU_o
     // Branch
     ,output wire        br_taken_o
@@ -266,7 +266,9 @@ Mux2to1 #(.size(32)) m_EX_freg_fwd3_MUX(
 );
 
 // ALU src
-wire [31:0] ALU_src1, ALU_src2;
+wire [31:0] ALU_src1 /* verilator public */;
+wire [31:0] ALU_src2 /* verilator public */;
+
 Mux2to1 #(.size(32)) m_ALU_SRC1_MUX(
     .sel(ALU_sel1_o),
     .s0(pc_o),
