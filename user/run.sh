@@ -31,7 +31,7 @@ riscv32-unknown-elf-gcc \
     -o $file_name.elf ../tools/start.s ../tools/utils.h ../tools/utils.c ../tools/serial.s $file_name.c
 
 if [ $? -ne 0 ]; then
-    echo "${RED}Error: Compilation failed for $file_name.c.${RESET}"
+    echo -e "${RED}Error: Compilation failed for $file_name.c.${RESET}"
     exit 1
 fi
 
