@@ -145,7 +145,7 @@ wire EX_fetch_invalid_out;
 
 wire EX_start, EX_done;
 // ALU ========================
-wire [31:0] ALU_out /* verilator public */;
+wire [31:0] ALU_out;
 
 // BranchCmp ==================
 wire br_taken; // indicate inst branch

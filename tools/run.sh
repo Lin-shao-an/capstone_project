@@ -24,6 +24,13 @@ fi
 cd ../riscv32-core-main
 if ! make -q; then
     make
+    build_exit_status=$?
+
+    if [ $build_exit_status -ne 0 ]; then
+        echo -e "${RED}Error: Build failed with exit status $build_exit_status.${RESET}"
+        exit 1
+    fi
+
     echo -e "${GREEN}Build complete.${RESET}"
 else
     echo -e "${YELLOW}Build is already up-to-date. Skipping build.${RESET}"

@@ -17,9 +17,6 @@ using namespace std;
 #include "VComputer_PipelineCPU.h"
 #include "VComputer_CSR.h"
 #include "VComputer_CSRFile.h"
-#include "VComputer_Exec.h"
-#include "VComputer_ALU_top.h"
-#include "VComputer_ALU.h"
 #include "verilated.h"
 
 #define MAX_CYCLE 100000
@@ -152,16 +149,6 @@ int main(int argc, char **argv){
             top->Computer->m_core0->WB_pc_valid_out &&
             top->Computer->m_core0->WB_pc_out==stop_pc
         ) break;
-
-        if (top->Computer->m_core0->m_EX->ALU_ctrl_o == 0b100){
-            if (top->Computer->m_core0->m_EX->ALU_src1 == 0x500 && top->Computer->m_core0->m_EX->ALU_src2 == 0x100 ||
-            top->Computer->m_core0->m_EX->ALU_src2 == 0x500 && top->Computer->m_core0->m_EX->ALU_src1 == 0x100){
-                printf("%x + %x\n",top->Computer->m_core0->m_EX->ALU_src1 , top->Computer->m_core0->m_EX->ALU_src2 );
-                top->Computer->m_core0->m_EX->m_ALU->m_ALU->Out = 0x1337;
-                printf("%x\n", top->Computer->m_core0->m_EX->m_ALU->m_ALU->Out);
-                printf("%x\n", top->Computer->m_core0->m_EX->m_ALU->ALU_out);
-            }
-        }
 
         if(top->Computer->m_core0->m_CSR->m_CSRFile->csr_serial_io_out_q != 0) {
             cout << static_cast<char>(top->Computer->m_core0->m_CSR->m_CSRFile->csr_serial_io_out_q);

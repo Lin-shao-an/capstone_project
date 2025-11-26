@@ -9,7 +9,7 @@ module ALU(
     input         invA,
     input         invB,
     input         Sign,
-    output [31:0] Out /* verilator public */,
+    output [31:0] Out,
     output        Ofl,
     output        Zero
 );
