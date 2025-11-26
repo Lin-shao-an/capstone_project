@@ -44,3 +44,5 @@ riscv32-core-main/obj_dir/*
 
 user/*
 !user/run.sh
+
+.vscode/
