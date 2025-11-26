@@ -19,7 +19,6 @@ module CSR (
 
     input  [31:0]               exception_pc_i,
     input  [11:0]               csr_rd_addr_i,
-    input                       magic_i,
 
     output                      csr_branch_o,
     output [31:0]               csr_target_o,
@@ -58,7 +57,6 @@ CSRFile m_CSRFile(
     .csr_wr_en_i(csr_wr_valid_r),
     .csr_wr_addr_i(csr_wr_addr_i),
     .csr_wr_data_i(csr_wr_data_r),
-    .magic_i(magic_i),
 
     .csr_branch_o(csr_branch_o),
     .csr_target_o(csr_target_o),

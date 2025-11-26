@@ -58,7 +58,6 @@ module CSRFile (
     ,input          csr_wr_en_i
     ,input  [11:0]  csr_wr_addr_i
     ,input  [31:0]  csr_wr_data_i
-    ,input          magic_i
 
     ,output         csr_branch_o
     ,output [31:0]  csr_target_o
@@ -464,7 +463,6 @@ end
 //-----------------------------------------------------------------
 // Sequential
 //-----------------------------------------------------------------
-reg csr_magic_set;
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         // CSR - Machine
@@ -502,10 +500,9 @@ always @(posedge clk or negedge rst_n) begin
             // SATP
         csr_satp_q     <= 32'b0;
     end else begin
-        if (magic_i) csr_magic_set <= 1'b1;
         // CSR - Machine
             // privilege level
-        csr_priv_q     <= (magic_i | csr_magic_set) ? `PRIV_MACHINE : csr_priv_r;
+        csr_priv_q     <= csr_priv_r;
             // Trap Setup
         csr_mstatus_q  <= csr_mstatus_r;
         csr_medeleg_q  <= (csr_medeleg_r  & `CSR_MEDELEG_MASK);
