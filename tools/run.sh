@@ -37,7 +37,6 @@ else
 fi
 cd ../tools
 
-# stop_pc="0x8"
 stop_pc=$(grep '<_end>:' "../user/$file_name.dump" | tr -d '\0' | cut -c 2-8)
 if [ -n "$stop_pc" ]; then
     stop_pc=$(printf "%d" "0x$stop_pc")
