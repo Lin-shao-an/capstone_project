@@ -111,8 +111,15 @@ void printf(char *format, ...) {
                     }
                 }
 
-                // Move to next argument:
+                // Move to next argument and reset per-specifier flags
                 is_special_code = false;
+                zero_padding_checked = false;
+                is_zero_padded = false;
+                is_left_aligned = false;
+                is_float_format = false;
+                field_width = 0;
+                precision = 0;
+                arg_char_counter = 0;
                 continue;
             }
             else if (*idx == 's' || *idx == 'S') {
@@ -124,6 +131,13 @@ void printf(char *format, ...) {
                 }
 
                 is_special_code = false;
+                zero_padding_checked = false;
+                is_zero_padded = false;
+                is_left_aligned = false;
+                is_float_format = false;
+                field_width = 0;
+                precision = 0;
+                arg_char_counter = 0;
                 continue;
             }
             else if (*idx == 'c' || *idx == 'C') {
@@ -132,6 +146,13 @@ void printf(char *format, ...) {
                 serial_putc(cur_val);
 
                 is_special_code = false;
+                zero_padding_checked = false;
+                is_zero_padded = false;
+                is_left_aligned = false;
+                is_float_format = false;
+                field_width = 0;
+                precision = 0;
+                arg_char_counter = 0;
                 continue;
             }
             else if (*idx == 'd' || *idx == 'D') {
@@ -190,6 +211,13 @@ void printf(char *format, ...) {
                 }
 
                 is_special_code = false;
+                zero_padding_checked = false;
+                is_zero_padded = false;
+                is_left_aligned = false;
+                is_float_format = false;
+                field_width = 0;
+                precision = 0;
+                arg_char_counter = 0;
                 continue;
             }
             else if (*idx == 'f' || *idx == 'F') {
@@ -298,6 +326,13 @@ void printf(char *format, ...) {
                 }
 
                 is_special_code = false;
+                zero_padding_checked = false;
+                is_zero_padded = false;
+                is_left_aligned = false;
+                is_float_format = false;
+                field_width = 0;
+                precision = 0;
+                arg_char_counter = 0;
                 continue;
             }
             else {
