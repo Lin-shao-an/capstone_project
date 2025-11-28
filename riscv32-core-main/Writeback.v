@@ -1,39 +1,40 @@
 `include "riscv_defs.v"
-module Writeback (
-    input  wire        clk,
-    input  wire        rst_n,
 
-    input  wire        en,
-    input  wire        clear,
+module Writeback (
+    input           clk,
+    input           rst_n,
+
+    input           en,
+    input           clear,
     // data_in
-    input  wire        is_impl_i,
-    input  wire        pc_valid_i,
-    input  wire [31:0] pc_i,
-    input  wire [31:0] pc_p4_i,
-    input  wire [4:0]  rd_i,
-    input  wire [5:0]  exception_i,
+    input           is_impl_i,
+    input           pc_valid_i,
+    input  [31:0]   pc_i,
+    input  [31:0]   pc_p4_i,
+    input  [4:0]    rd_i,
+    input  [5:0]    exception_i,
     
-    input  wire [31:0] bypass_i,
-    input  wire [31:0] ALU_i,
-    input  wire [31:0] MUL_DIV_i,
-    input  wire [31:0] FPU_i,
-    input  wire [31:0] mem_data_i,
-    input  wire [31:0] csr_rd_data_i,
+    input  [31:0]   bypass_i,
+    input  [31:0]   ALU_i,
+    input  [31:0]   MUL_DIV_i,
+    input  [31:0]   FPU_i,
+    input  [31:0]   mem_data_i,
+    input  [31:0]   csr_rd_data_i,
     // control_in
-    input  wire        reg_wr_en_i,
-    input wire         freg_wr_en_i,
-    input  wire [2:0]  reg_w_sel_i,
+    input           reg_wr_en_i,
+    input           freg_wr_en_i,
+    input  [2:0]    reg_w_sel_i,
     // ===================================
     // data_out
-    output wire        is_impl_o,
-    output wire        pc_valid_o,
-    output wire [31:0] pc_o,
-    output wire [ 4:0] rd_o,
-    output wire [31:0] wb_data_o,
+    output          is_impl_o,
+    output          pc_valid_o,
+    output [31:0]   pc_o,
+    output [4:0]    rd_o,
+    output [31:0]   wb_data_o,
 
     // control_out
-    output wire        reg_wr_en_o,
-    output wire        freg_wr_en_o
+    output          reg_wr_en_o,
+    output          freg_wr_en_o
 );
 
 // WB_Reg =====================

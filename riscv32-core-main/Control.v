@@ -1,47 +1,48 @@
 `include "riscv_defs.v"
+
 module Control (
-    input [31:0] inst,
+    input  [31:0]   inst,
     // WB stage
-    output reg_wr_en_o,
-    output freg_wr_en_o,
-    output [2:0] reg_w_sel_o, // 0: pc_p4, 1: ALU, 2: mem, 3:csr, 4: FPU, 5: bypass, 6: MUL_DIV_top
+    output          reg_wr_en_o,
+    output          freg_wr_en_o,
+    output [2:0]    reg_w_sel_o, // 0: pc_p4, 1: ALU, 2: mem, 3:csr, 4: FPU, 5: bypass, 6: MUL_DIV_top
     
     // LSU
-    output mem_wr_en_o,
-    output mem_rd_en_o,
-    output [3:0] mem_ctrl_o,
+    output          mem_wr_en_o,
+    output          mem_rd_en_o,
+    output [3:0]    mem_ctrl_o,
     
     // Branch
-    output is_j_o,
-    output is_br_o,
-    output [2:0] cmp_op_o,
+    output          is_j_o,
+    output          is_br_o,
+    output [2:0]    cmp_op_o,
     
     // ALU
-    output [3:0] ALU_ctrl_o,
-    output ALU_sel1_o, // 0: PC, 1: rs1
-    output ALU_sel2_o, // 0: rs2, 1: imm
+    output [3:0]    ALU_ctrl_o,
+    output          ALU_sel1_o, // 0: PC, 1: rs1
+    output          ALU_sel2_o, // 0: rs2, 1: imm
 
     // MUL/DIV
-    output is_MUL_DIV_o,
-    output [2:0] MUL_DIV_ctrl_o,
+    output          is_MUL_DIV_o,
+    output [2:0]    MUL_DIV_ctrl_o,
 
     // CSR
-    output is_csr_o,
-    output [2:0] csr_op_o,
-    output is_csr_imm_o, // is csr[r w]i
+    output          is_csr_o,
+    output [2:0]    csr_op_o,
+    output          is_csr_imm_o, // is csr[r w]i
 
     // FPU
-    output is_fpu_o,
-    output FPU_sel1_o, // 0: fs1, 1: rs1
-    output is_f_ext_o,
+    output          is_fpu_o,
+    output          FPU_sel1_o, // 0: fs1, 1: rs1
+    output          is_f_ext_o,
 
     // Bypass
-    output [1:0] bypass_sel_o,
+    output [1:0]    bypass_sel_o,
 
     // Fence
-    output fetch_invalid_o,
+    output          fetch_invalid_o,
 
-    output is_impl_o
+    output          is_impl_o
 );
 
 // declare
@@ -133,14 +134,14 @@ wire is_impl_w =((inst&`INST_ADDI_MASK) == `INST_ADDI)   ||
                 ((inst&`INST_SH_MASK) == `INST_SH)     ||
                 ((inst&`INST_SW_MASK) == `INST_SW)     ||
                 // M-Ext
-                ((inst&`INST_MUL_MASK) == `INST_MUL)        ||
-                ((inst&`INST_MULH_MASK) == `INST_MULH)      ||
-                ((inst&`INST_MULHSU_MASK) == `INST_MULHSU)  ||
-                ((inst&`INST_MULHU_MASK) == `INST_MULHU)    ||
-                ((inst&`INST_DIV_MASK) == `INST_DIV)        ||
-                ((inst&`INST_DIVU_MASK) == `INST_DIVU)      ||
-                ((inst&`INST_REM_MASK) == `INST_REM)        ||
-                ((inst&`INST_REMU_MASK) == `INST_REMU)      ||
+                ((inst&`INST_MUL_MASK) == `INST_MUL)       ||
+                ((inst&`INST_MULH_MASK) == `INST_MULH)     ||
+                ((inst&`INST_MULHSU_MASK) == `INST_MULHSU) ||
+                ((inst&`INST_MULHU_MASK) == `INST_MULHU)   ||
+                ((inst&`INST_DIV_MASK) == `INST_DIV)       ||
+                ((inst&`INST_DIVU_MASK) == `INST_DIVU)     ||
+                ((inst&`INST_REM_MASK) == `INST_REM)       ||
+                ((inst&`INST_REMU_MASK) == `INST_REMU)     ||
                 // Zicsr
                 ((inst&`INST_CSRRW_MASK) == `INST_CSRRW)   ||
                 ((inst&`INST_CSRRS_MASK) == `INST_CSRRS)   ||
@@ -155,7 +156,7 @@ wire is_impl_w =((inst&`INST_ADDI_MASK) == `INST_ADDI)   ||
                 // fence
                 ((inst&`INST_FENCE_MASK) == `INST_FENCE) ||
                 // Wfi
-                ((inst&`INST_WFI_MASK) == `INST_WFI)       ||
+                ((inst&`INST_WFI_MASK) == `INST_WFI) ||
                 // RVF
                 ((inst&`INST_FMADD_MASK) == `INST_FMADD)         ||
                 ((inst&`INST_FMSUB_MASK) == `INST_FMSUB)         ||
@@ -215,14 +216,14 @@ wire reg_wr_en_w = ((inst&`INST_ADDI_MASK) == `INST_ADDI)    ||
                     ((inst&`INST_LHU_MASK) == `INST_LHU) ||
                     ((inst&`INST_LW_MASK) == `INST_LW)   ||
                     // M-Ext
-                    ((inst&`INST_MUL_MASK) == `INST_MUL)        ||
-                    ((inst&`INST_MULH_MASK) == `INST_MULH)      ||
-                    ((inst&`INST_MULHSU_MASK) == `INST_MULHSU)  ||
-                    ((inst&`INST_MULHU_MASK) == `INST_MULHU)    ||
-                    ((inst&`INST_DIV_MASK) == `INST_DIV)        ||
-                    ((inst&`INST_DIVU_MASK) == `INST_DIVU)      ||
-                    ((inst&`INST_REM_MASK) == `INST_REM)        ||
-                    ((inst&`INST_REMU_MASK) == `INST_REMU)      ||
+                    ((inst&`INST_MUL_MASK) == `INST_MUL)       ||
+                    ((inst&`INST_MULH_MASK) == `INST_MULH)     ||
+                    ((inst&`INST_MULHSU_MASK) == `INST_MULHSU) ||
+                    ((inst&`INST_MULHU_MASK) == `INST_MULHU)   ||
+                    ((inst&`INST_DIV_MASK) == `INST_DIV)       ||
+                    ((inst&`INST_DIVU_MASK) == `INST_DIVU)     ||
+                    ((inst&`INST_REM_MASK) == `INST_REM)       ||
+                    ((inst&`INST_REMU_MASK) == `INST_REMU)     ||
                     // CSR
                     ((inst&`INST_CSRRW_MASK) == `INST_CSRRW)   ||
                     ((inst&`INST_CSRRS_MASK) == `INST_CSRRS)   ||
@@ -246,17 +247,17 @@ wire mem_rd_en_w = ((inst&`INST_LB_MASK) == `INST_LB)    ||
                     ((inst&`INST_LW_MASK) == `INST_LW)   ||
                     // FPU
                     ((inst&`INST_FLW_MASK) == `INST_FLW) ||
-                    ((inst&`INST_FLD_MASK) == `INST_FLD);
+                    ((inst&`INST_FLD_MASK) == `INST_FLD) ;
                     
 wire mem_wr_en_w = ((inst&`INST_SB_MASK) == `INST_SB)   ||
                    ((inst&`INST_SH_MASK) == `INST_SH)   ||
                    ((inst&`INST_SW_MASK) == `INST_SW)   ||
                    // FPU
                    ((inst&`INST_FSW_MASK) == `INST_FSW) ||
-                   ((inst&`INST_FSD_MASK) == `INST_FSD);
+                   ((inst&`INST_FSD_MASK) == `INST_FSD) ;
 
-wire is_j_w = ((inst&`INST_JAL_MASK) == `INST_JAL)  ||
-              ((inst&`INST_JALR_MASK) == `INST_JALR);
+wire is_j_w = ((inst&`INST_JAL_MASK) == `INST_JAL)   ||
+              ((inst&`INST_JALR_MASK) == `INST_JALR) ;
 
 wire is_br_w = ((inst&`INST_BEQ_MASK) == `INST_BEQ)   ||
                ((inst&`INST_BNE_MASK) == `INST_BNE)   ||
@@ -265,28 +266,28 @@ wire is_br_w = ((inst&`INST_BEQ_MASK) == `INST_BEQ)   ||
                ((inst&`INST_BLTU_MASK) == `INST_BLTU) ||
                ((inst&`INST_BGEU_MASK) == `INST_BGEU) ;
 
-wire is_MUL_DIV_w = ((inst&`INST_MUL_MASK) == `INST_MUL)        ||
-                    ((inst&`INST_MULH_MASK) == `INST_MULH)      ||
-                    ((inst&`INST_MULHSU_MASK) == `INST_MULHSU)  ||
-                    ((inst&`INST_MULHU_MASK) == `INST_MULHU)    ||
-                    ((inst&`INST_DIV_MASK) == `INST_DIV)        ||
-                    ((inst&`INST_DIVU_MASK) == `INST_DIVU)      ||
-                    ((inst&`INST_REM_MASK) == `INST_REM)        ||
-                    ((inst&`INST_REMU_MASK) == `INST_REMU)      ;
+wire is_MUL_DIV_w = ((inst&`INST_MUL_MASK) == `INST_MUL)       ||
+                    ((inst&`INST_MULH_MASK) == `INST_MULH)     ||
+                    ((inst&`INST_MULHSU_MASK) == `INST_MULHSU) ||
+                    ((inst&`INST_MULHU_MASK) == `INST_MULHU)   ||
+                    ((inst&`INST_DIV_MASK) == `INST_DIV)       ||
+                    ((inst&`INST_DIVU_MASK) == `INST_DIVU)     ||
+                    ((inst&`INST_REM_MASK) == `INST_REM)       ||
+                    ((inst&`INST_REMU_MASK) == `INST_REMU)     ;
 
-wire is_csr_w = ((inst&`INST_CSRRW_MASK) == `INST_CSRRW)    ||
-                ((inst&`INST_CSRRS_MASK) == `INST_CSRRS)    ||
-                ((inst&`INST_CSRRC_MASK) == `INST_CSRRC)    ||
-                ((inst&`INST_CSRRWI_MASK) == `INST_CSRRWI)  ||
-                ((inst&`INST_CSRRSI_MASK) == `INST_CSRRSI)  ||
-                ((inst&`INST_CSRRCI_MASK) == `INST_CSRRCI)  ||
-                ((inst & `INST_ECALL_MASK) == `INST_ECALL)  ||
-                ((inst & `INST_EBREAK_MASK) == `INST_EBREAK)||
-                ((inst & `INST_ERET_MASK) == `INST_ERET)    ;
+wire is_csr_w = ((inst&`INST_CSRRW_MASK) == `INST_CSRRW)     ||
+                ((inst&`INST_CSRRS_MASK) == `INST_CSRRS)     ||
+                ((inst&`INST_CSRRC_MASK) == `INST_CSRRC)     ||
+                ((inst&`INST_CSRRWI_MASK) == `INST_CSRRWI)   ||
+                ((inst&`INST_CSRRSI_MASK) == `INST_CSRRSI)   ||
+                ((inst&`INST_CSRRCI_MASK) == `INST_CSRRCI)   ||
+                ((inst & `INST_ECALL_MASK) == `INST_ECALL)   ||
+                ((inst & `INST_EBREAK_MASK) == `INST_EBREAK) ||
+                ((inst & `INST_ERET_MASK) == `INST_ERET)     ;
 
-wire is_csr_imm_w = ((inst&`INST_CSRRWI_MASK) == `INST_CSRRWI)  ||
-                    ((inst&`INST_CSRRSI_MASK) == `INST_CSRRSI)  ||
-                    ((inst&`INST_CSRRCI_MASK) == `INST_CSRRCI)  ;
+wire is_csr_imm_w = ((inst&`INST_CSRRWI_MASK) == `INST_CSRRWI) ||
+                    ((inst&`INST_CSRRSI_MASK) == `INST_CSRRSI) ||
+                    ((inst&`INST_CSRRCI_MASK) == `INST_CSRRCI) ;
 
 wire is_alu_w = ((inst&`INST_ADDI_MASK) == `INST_ADDI)   ||
                 ((inst&`INST_SLTI_MASK) == `INST_SLTI)   ||
@@ -309,8 +310,8 @@ wire is_alu_w = ((inst&`INST_ADDI_MASK) == `INST_ADDI)   ||
                 ((inst&`INST_SUB_MASK) == `INST_SUB)     ||
                 ((inst&`INST_SRA_MASK) == `INST_SRA)     ||
                 // Jump
-                ((inst&`INST_JAL_MASK) == `INST_JAL)     ||
-                ((inst&`INST_JALR_MASK) == `INST_JALR)   ;
+                ((inst&`INST_JAL_MASK) == `INST_JAL)   ||
+                ((inst&`INST_JALR_MASK) == `INST_JALR) ;
 
 wire is_lsu_w = ((inst&`INST_LB_MASK) == `INST_LB)   ||
                 ((inst&`INST_LBU_MASK) == `INST_LBU) ||
@@ -321,8 +322,8 @@ wire is_lsu_w = ((inst&`INST_LB_MASK) == `INST_LB)   ||
                 ((inst&`INST_SH_MASK) == `INST_SH)   ||
                 ((inst&`INST_SW_MASK) == `INST_SW)   ||
                 // F Extension
-                ((inst&`INST_FLW_MASK) == `INST_FLW)  ||
-                ((inst&`INST_FSW_MASK) == `INST_FSW);
+                ((inst&`INST_FLW_MASK) == `INST_FLW) ||
+                ((inst&`INST_FSW_MASK) == `INST_FSW) ;
 
 wire freg_wr_en_w = ((inst&`INST_FMADD_MASK) == `INST_FMADD)         ||
                     ((inst&`INST_FMSUB_MASK) == `INST_FMSUB)         ||
@@ -518,14 +519,14 @@ always @(*) begin
 
     // 0: pc_p4, 1: ALU, 2: mem, 3:csr, 4: FPU, 5: bypass
     // reg_w_sel
-    if      (is_j_w)                                 reg_w_sel_r = 0;
-    else if (|bypass_sel_r)                          reg_w_sel_r = 5; // bypass
-    else if (is_alu_w)                               reg_w_sel_r = 1; // ALUout
-    else if (is_lsu_w)                               reg_w_sel_r = 2; // memory
-    else if (is_csr_w)                               reg_w_sel_r = 3; // CSR read data path
-    else if (is_fpu_w)                               reg_w_sel_r = 4; // FPU result
-    else if (is_MUL_DIV_w)                           reg_w_sel_r = 6;
-    else                                             reg_w_sel_r = 0; // default PC+4
+    if      (is_j_w)        reg_w_sel_r = 0;
+    else if (|bypass_sel_r) reg_w_sel_r = 5; // bypass
+    else if (is_alu_w)      reg_w_sel_r = 1; // ALUout
+    else if (is_lsu_w)      reg_w_sel_r = 2; // memory
+    else if (is_csr_w)      reg_w_sel_r = 3; // CSR read data path
+    else if (is_fpu_w)      reg_w_sel_r = 4; // FPU result
+    else if (is_MUL_DIV_w)  reg_w_sel_r = 6;
+    else                    reg_w_sel_r = 0; // default PC+4
 end
 
 endmodule

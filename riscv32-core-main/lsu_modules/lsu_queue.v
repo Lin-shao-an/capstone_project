@@ -1,7 +1,3 @@
-//-----------------------------------------------------------------
-// LSU Queue
-//-----------------------------------------------------------------
-
 module lsu_queue
 #(
     parameter DATASIZE = 32, 
@@ -9,15 +5,15 @@ module lsu_queue
     parameter DEPTH = 8     // Maximal element of queue.
 )  
 (
-    input clk_i,
-    input rst_i,
-    input [DATASIZE-1:0] data_i,
-    input push_i,
-    input pop_i,
+    input                   clk_i,
+    input                   rst_i,
+    input  [DATASIZE-1:0]   data_i,
+    input                   push_i,
+    input                   pop_i,
     
-    output [DATASIZE-1:0] data_o,
-    output accept_o,                // Push success
-    output valid_o                  // Pop success
+    output [DATASIZE-1:0]   data_o,
+    output                  accept_o,                // Push success
+    output                  valid_o                  // Pop success
 );
 
 localparam ADDRSIZE = 32;
@@ -46,7 +42,8 @@ always @(posedge clk_i or negedge rst_i) begin
         for (i = 0; i < LENGTH; i = i + 1) begin
             ram_q[i] <= 0;
         end
-    end else begin
+    end
+    else begin
         // Push
         if (accept && push_i) begin
             ram_q[wr_ptr] <= data_i;

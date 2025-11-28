@@ -1,13 +1,14 @@
 module BranchUnit (
-    input is_br,
-    input is_j,
+    input                   is_br,
+    input                   is_j,
     
-    input [2:0] cmp_op,
-    input signed [31:0] reg_rd_data1,
-    input signed [31:0] reg_rd_data2,
+    input  [2:0]            cmp_op,
+    input  signed [31:0]    reg_rd_data1,
+    input  signed [31:0]    reg_rd_data2,
     
-    output br_taken // inst br taken
+    output                  br_taken // inst br taken
 );
+
 // 0 beq
 // 1 bne
 // 2 blt

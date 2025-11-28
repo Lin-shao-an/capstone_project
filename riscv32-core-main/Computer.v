@@ -1,6 +1,6 @@
 module Computer(
-    input clk,
-    input rst_n
+    input   clk,
+    input   rst_n
 );
 
 wire [31:0] i_mem_addr;

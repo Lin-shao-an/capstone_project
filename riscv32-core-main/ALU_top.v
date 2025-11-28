@@ -1,10 +1,10 @@
-/* verilator lint_off UNUSEDSIGNAL */
 `include "riscv_defs.v"
+
 module ALU_top(
-    input [3:0] ALU_ctrl,
-    input [31:0] a,
-    input [31:0] b,
-    output reg [31:0] out
+    input  [3:0]        ALU_ctrl,
+    input  [31:0]       a,
+    input  [31:0]       b,
+    output reg [31:0]   out
 );
 
 reg [2:0]  Oper;
@@ -29,8 +29,8 @@ ALU m_ALU(
 );
 
 always @(*) begin
-    Oper=3'b100;
-    invB=0;
+    Oper = 3'b100;
+    invB = 0;
     out = 32'h0;
     Sign = 0;
     case (ALU_ctrl)
@@ -81,6 +81,5 @@ always @(*) begin
         default:;
     endcase
 end
-
 
 endmodule

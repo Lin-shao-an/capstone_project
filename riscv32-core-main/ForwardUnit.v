@@ -1,16 +1,16 @@
 module ForwardUnit (
-    input wire [4:0] EX_rs1,
-    input wire [4:0] EX_rs2,
-    input wire [4:0] EX_rs3,
-    input wire [4:0] WB_rd,
-    input wire       WB_reg_wr_en,
-    input wire       WB_freg_wr_en,
+    input  [4:0]    EX_rs1,
+    input  [4:0]    EX_rs2,
+    input  [4:0]    EX_rs3,
+    input  [4:0]    WB_rd,
+    input           WB_reg_wr_en,
+    input           WB_freg_wr_en,
 
-    output reg EX_fwd_sel1,
-    output reg EX_fwd_sel2,
-    output reg EX_freg_fwd_sel1,
-    output reg EX_freg_fwd_sel2,
-    output reg EX_freg_fwd_sel3
+    output reg      EX_fwd_sel1,
+    output reg      EX_fwd_sel2,
+    output reg      EX_freg_fwd_sel1,
+    output reg      EX_freg_fwd_sel2,
+    output reg      EX_freg_fwd_sel3
 );
 
 always @(*) begin

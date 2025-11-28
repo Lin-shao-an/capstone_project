@@ -1,17 +1,14 @@
-//-----------------------------------------------------------------
-// ALU
-//-----------------------------------------------------------------
 module ALU(
-    input  [31:0] InA,
-    input  [31:0] InB,
-    input         Cin,
-    input  [2:0]  Oper,
-    input         invA,
-    input         invB,
-    input         Sign,
-    output [31:0] Out,
-    output        Ofl,
-    output        Zero
+    input  [31:0]   InA,
+    input  [31:0]   InB,
+    input           Cin,
+    input  [2:0]    Oper,
+    input           invA,
+    input           invB,
+    input           Sign,
+    output [31:0]   Out,
+    output          Ofl,
+    output          Zero
 );
 
 wire [31:0] shift_out; 
@@ -49,7 +46,7 @@ assign Out = result;
 assign Ofl = Ofl_result; 
 assign Zero = Zero_result;
 
-always @(*)begin
+always @(*) begin
     case(Oper)
         3'b100: result = A + B + {31'h0, Cin};
         3'b101: result = A & B;

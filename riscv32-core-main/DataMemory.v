@@ -1,21 +1,23 @@
 module DataMemory
-#(parameter SIZE = 65536)          // in BYTES (must be >= maximum address+4)
+#(
+    parameter SIZE = 65536              // in BYTES (must be >= maximum address+4)
+)
 (
-    input  wire        rst_n,      // active-low asynchronous reset
-    input  wire        clk,        // rising-edge clock
+    input               rst_n,          // active-low asynchronous reset
+    input               clk,            // rising-edge clock
 
-	input  wire [31:0] i_addr,
-	output wire [31:0] inst,
-    output wire        i_available_o,
+	input  [31:0]       i_addr,
+	output [31:0]       inst,
+    output              i_available_o,
     
-	input  wire        wr_en,   // 1 = store
-    input  wire        rd_en,    // 1 = load
-    input  wire [3:0]  ctrl,    // [3]=sign , [2]=word , [1]=half , [0]=byte
+	input               wr_en,          // 1 = store
+    input               rd_en,          // 1 = load
+    input  [3:0]        ctrl,           // [3]=sign , [2]=word , [1]=half , [0]=byte
     
-	input  wire [31:0] address,    // byte address
-    input  wire [31:0] data_i,  // store data (little-endian)
-    output reg  [31:0] data_o,    // load data (extended)
-	output wire 	   available_o
+	input  [31:0]       address,        // byte address
+    input  [31:0]       data_i,         // store data (little-endian)
+    output reg [31:0]   data_o,         // load data (extended)
+	output  	        available_o
 );
 
 reg [7:0] mem [0:SIZE-1] /* verilator public */;
@@ -92,7 +94,8 @@ end
 always @(posedge clk or negedge rst_n)begin
 	if(!rst_n)begin
 		data_o <= 32'h0;
-	end else begin
+	end
+    else begin
 		data_o <= {mem[address+3], mem[address+2], mem[address+1], mem[address]};
 	end	
 end

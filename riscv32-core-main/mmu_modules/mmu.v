@@ -1,66 +1,59 @@
-//-----------------------------------------------------------------
-// MMU
-//-----------------------------------------------------------------
-
 `include "../riscv_defs.v"
 
 module mmu
 #(
-     parameter  MMU_SUPPORT = 1 
-    ,parameter  ADDR_MIN = 32'h80000000
-    ,parameter  ADDR_MAX = 32'hffffffff
-    ,parameter  ICACHE_ADDR_MIN = 32'h80000000
-    ,parameter  ICACHE_ADDR_MAX = 32'h80010000
+    parameter MMU_SUPPORT = 1,
+    parameter ADDR_MIN = 32'h80000000,
+    parameter ADDR_MAX = 32'hffffffff,
+    parameter ICACHE_ADDR_MIN = 32'h80000000,
+    parameter ICACHE_ADDR_MAX = 32'h80010000
 )
 (
-     input          clk_i
-    ,input          rst_i
-    ,input  [31:0]  satp_i
+    input           clk_i,
+    input           rst_i,
+    input  [31:0]   satp_i,
 
-    ,input  [31:0]  fetch_pc_i
-    ,input          fetch_rd_i
-    ,input  [31:0]  lsu_in_addr_i
-    ,input  [31:0]  lsu_in_data_i
-    ,input          lsu_in_rd_i
-    ,input          lsu_in_wr_i
-    ,input  [ 3:0]  lsu_in_mask_i
-    ,input          lsu_in_flush_i
-    ,input          lsu_in_invalidate_i
-    ,input          lsu_in_writeback_i
+    input  [31:0]   fetch_pc_i,
+    input           fetch_rd_i,
+    input  [31:0]   lsu_in_addr_i,
+    input  [31:0]   lsu_in_data_i,
+    input           lsu_in_rd_i,
+    input           lsu_in_wr_i,
+    input  [3:0]    lsu_in_mask_i,
+    input           lsu_in_flush_i,
+    input           lsu_in_invalidate_i,
+    input           lsu_in_writeback_i,
 
-    ,input  [31:0]  dcache_in_value_i
-    ,input          dcache_in_valid_i
-    ,input  [31:0]  icache_in_value_i
-    ,input          icache_in_valid_i
+    input  [31:0]   dcache_in_value_i,
+    input           dcache_in_valid_i,
+    input  [31:0]   icache_in_value_i,
+    input           icache_in_valid_i,
 
-    ,output [31:0]  fetch_out_value_o
-    ,output         fetch_out_valid_o
-    ,output [31:0]  lsu_out_value_o
-    ,output         lsu_out_valid_o
+    output [31:0]   fetch_out_value_o,
+    output          fetch_out_valid_o,
+    output [31:0]   lsu_out_value_o,
+    output          lsu_out_valid_o,
 
-    ,output [31:0]  dcache_addr_o
-    ,output [31:0]  dcache_value_o
-    ,output         dcache_rd_o
-    ,output         dcache_wr_o
-    ,output [ 3:0]  dcache_mask_o
-    ,output         dcache_flush_o
-    ,output         dcache_invalidate_o
-    ,output         dcache_writeback_o
-    ,output [31:0]  icache_addr_o
-    ,output         icache_rd_o
+    output [31:0]   dcache_addr_o,
+    output [31:0]   dcache_value_o,
+    output          dcache_rd_o,
+    output          dcache_wr_o,
+    output [3:0]    dcache_mask_o,
+    output          dcache_flush_o,
+    output          dcache_invalidate_o,
+    output          dcache_writeback_o,
+    output [31:0]   icache_addr_o,
+    output          icache_rd_o,
 
-    ,output         load_fault_o
-    ,output         store_fault_o
-    ,output         inst_fault_o
+    output          load_fault_o,
+    output          store_fault_o,
+    output          inst_fault_o
 );
 
-
-
 generate
-if(MMU_SUPPORT) 
-begin : MMU
+if(MMU_SUPPORT) begin : MMU
 
-localparam PPN_SIZE             = 20;
+localparam PPN_SIZE = 20;
 
 wire itlb_req = fetch_rd_i;
 wire dtlb_req = lsu_in_rd_i || lsu_in_wr_i;
@@ -141,7 +134,7 @@ assign dcache_addr_o        = dcache_addr_r;
 assign dcache_value_o       = lsu_in_data_i;
 assign dcache_mask_o        = dcache_mask_r;
 
-always @(*)begin
+always @(*) begin
     dcache_addr_r = 32'h0;
     icache_addr_r = 32'h0;
     dcache_mask_r = 0;
@@ -167,9 +160,9 @@ always @(*)begin
         dcache_mask_r = 4'h0;
 end
 
-assign load_fault_o     = lsu_in_rd_i   && ( ptw_pte_fault_o || (!dtlb_entry_o[`PAGE_READ]  && dtlb_hit));
+assign load_fault_o     = lsu_in_rd_i && ( ptw_pte_fault_o || (!dtlb_entry_o[`PAGE_READ]  && dtlb_hit));
 assign store_fault_o    = lsu_in_wr_i && ( ptw_pte_fault_o || (!dtlb_entry_o[`PAGE_WRITE] && dtlb_hit));
-assign inst_fault_o     = fetch_rd_i    && ( ptw_pte_fault_o || (!itlb_entry_o[`PAGE_EXEC]  && itlb_hit));
+assign inst_fault_o     = fetch_rd_i  && ( ptw_pte_fault_o || (!itlb_entry_o[`PAGE_EXEC]  && itlb_hit));
 
 assign dcache_invalidate_o  = lsu_in_invalidate_i;
 assign dcache_flush_o       = lsu_in_flush_i;
@@ -206,26 +199,22 @@ mmu_tlb #(
     .entry_o  (dtlb_entry_o)
 );
 
-always @(*)begin
+always @(*) begin
     itlb_vpn_i      = 20'b0;
     dtlb_vpn_i      = 20'b0;
     update_entry    = 32'b0;
 
-    if(is_update)
-    begin
-        if(itlb_req)
-        begin
+    if(is_update) begin
+        if(itlb_req) begin
             itlb_vpn_i   = ptw_pte_addr_o[19:0];   
             update_entry = ptw_pte_value_o;
         end
-        else if(dtlb_req)
-        begin
+        else if(dtlb_req) begin
             dtlb_vpn_i   = ptw_pte_addr_o[19:0];
             update_entry = ptw_pte_value_o;
         end
     end
-    else 
-    begin
+    else begin
         itlb_vpn_i = fetch_pc_i[31:12];
         dtlb_vpn_i = lsu_in_addr_i[31:12];
     end
@@ -247,7 +236,7 @@ wire [31:0] ptw_req_addr_i   = ptw_req_addr_r;
 // wire        ptw_error_i      = dcache_addr_error && dcache_rd_o; 
 wire        ptw_error_i = 0;
 
-always @(*)begin
+always @(*) begin
     ptw_req_addr_r = 32'h0;
     
     if(dtlb_req)
@@ -273,8 +262,7 @@ mmu_ptw ptw(
 );
 
 end
-else 
-begin : SIMPLE_MMU
+else begin : SIMPLE_MMU
 
 mmu_cache_ctrl u_mmu_cache_ctrl(
     .clk_i                  (clk_i),
@@ -306,6 +294,5 @@ assign inst_fault_o = 0;
 
 end
 endgenerate
-
 
 endmodule

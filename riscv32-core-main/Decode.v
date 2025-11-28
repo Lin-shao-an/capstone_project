@@ -1,74 +1,75 @@
 module Decode (
-    input clk,
-    input rst_n,
-    input en,
-    input clear,
+    input               clk,
+    input               rst_n,
+    input               en,
+    input               clear,
 
-    input [31:0] pc_i,
-    input [31:0] pc_p4_i,
-    input [31:0] inst_i,
+    input  [31:0]       pc_i,
+    input  [31:0]       pc_p4_i,
+    input  [31:0]       inst_i,
 
-    input bp_pred_taken_i,
-    input [31:0] bp_pred_target_i,
+    input               bp_pred_taken_i,
+    input  [31:0]       bp_pred_target_i,
 
-    output pc_valid_o,
-    output [31:0] pc_o,
-    output [31:0] pc_p4_o,
-    output [31:0] inst_o,
+    output              pc_valid_o,
+    output [31:0]       pc_o,
+    output [31:0]       pc_p4_o,
+    output [31:0]       inst_o,
 
-    output bp_pred_taken_o,
-    output [31:0] bp_pred_target_o,
+    output              bp_pred_taken_o,
+    output [31:0]       bp_pred_target_o,
     
-    output [4:0] rs1_o,
-    output [4:0] rs2_o,
-    output [4:0] rs3_o,
-    output [4:0] rd_o,
-    output reg [11:0] csr_addr_o,
+    output [4:0]        rs1_o,
+    output [4:0]        rs2_o,
+    output [4:0]        rs3_o,
+    output [4:0]        rd_o,
+    output reg [11:0]   csr_addr_o,
 
-    output reg [31:0] imm_o,
+    output reg [31:0]   imm_o,
 
     // WB stage
-    output reg_wr_en_o,
-    output freg_wr_en_o,
-    output [2:0] reg_w_sel_o, // 0: pc_p4, 1: ALU, 2: mem, 3:csr, 4: FPU, 5: bypass, 6: MUL_DIV_top
+    output              reg_wr_en_o,
+    output              freg_wr_en_o,
+    output [2:0]        reg_w_sel_o, // 0: pc_p4, 1: ALU, 2: mem, 3:csr, 4: FPU, 5: bypass, 6: MUL_DIV_top
     
     // LSU
-    output mem_wr_en_o,
-    output mem_rd_en_o,
-    output [3:0] mem_ctrl_o,
+    output              mem_wr_en_o,
+    output              mem_rd_en_o,
+    output [3:0]        mem_ctrl_o,
     
     // Branch
-    output is_j_o,
-    output is_br_o,
-    output [2:0] cmp_op_o,
+    output              is_j_o,
+    output              is_br_o,
+    output [2:0]        cmp_op_o,
     
     // ALU
-    output [3:0] ALU_ctrl_o,
-    output ALU_sel1_o, // 0: PC, 1: rs1
-    output ALU_sel2_o, // 0: rs2, 1: imm
+    output [3:0]        ALU_ctrl_o,
+    output              ALU_sel1_o, // 0: PC, 1: rs1
+    output              ALU_sel2_o, // 0: rs2, 1: imm
 
     // MUL/DIV
-    output is_MUL_DIV_o,
-    output [2:0] MUL_DIV_ctrl_o,
+    output              is_MUL_DIV_o,
+    output [2:0]        MUL_DIV_ctrl_o,
 
     // CSR
-    output is_csr_o,
-    output [2:0] csr_op_o,
-    output is_csr_imm_o, // is csr[r w]i
+    output              is_csr_o,
+    output [2:0]        csr_op_o,
+    output              is_csr_imm_o, // is csr[r w]i
 
     // FPU
-    output is_f_ext_o,
-    output is_fpu_o,
-    output FPU_sel1_o, // 0: fs1, 1: rs1
+    output              is_f_ext_o,
+    output              is_fpu_o,
+    output              FPU_sel1_o, // 0: fs1, 1: rs1
 
     // Bypass
-    output [1:0] bypass_sel_o,
+    output [1:0]        bypass_sel_o,
 
     // Fence
-    output fetch_invalid_o,
+    output              fetch_invalid_o,
 
-    output is_impl_o
+    output              is_impl_o
 );
+
 parameter CSR_FRM = 12'h002;
 
 // Immediate Generation

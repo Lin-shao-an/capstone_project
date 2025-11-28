@@ -1,46 +1,42 @@
-//-----------------------------------------------------------------
-// LSU
-//-----------------------------------------------------------------
-
 `include"../riscv_defs.v"
 
 module lsu
 #(
-     parameter LENGTH   = 32
-    ,parameter DEPTH    = 8
+    parameter LENGTH = 32,
+    parameter DEPTH = 8
 )
 (   
-     input           clk_i
-    ,input           rst_i
-    ,input   [31:0]  opcode_opcode_i
-    ,input   [31:0]  opcode_ra_data_i
-    ,input   [31:0]  opcode_rb_data_i
-    ,input   [31:0]  opcode_fp_data_i
-    ,input           opcode_valid_i
+    input               clk_i,
+    input               rst_i,
+    input  [31:0]       opcode_opcode_i,
+    input  [31:0]       opcode_ra_data_i,
+    input  [31:0]       opcode_rb_data_i,
+    input  [31:0]       opcode_fp_data_i,
+    input               opcode_valid_i,
     
-    ,input   [31:0]  ex_mem_imm_i
-    ,input           ex_mem_rd_i
-    ,input           ex_mem_wr_i
-    ,input   [ 3:0]  ex_mem_ctrl_i
+    input  [31:0]       ex_mem_imm_i,
+    input               ex_mem_rd_i,
+    input               ex_mem_wr_i,
+    input  [3:0]        ex_mem_ctrl_i,
 
-    ,input   [31:0]  mmu_value_i
-    ,input           mmu_valid_i
-    ,input           mmu_load_fault
-    ,input           mmu_store_fault
+    input  [31:0]       mmu_value_i,
+    input               mmu_valid_i,
+    input               mmu_load_fault,
+    input               mmu_store_fault,
 
-    ,output  [31:0]  mmu_addr_o
-    ,output  [31:0]  mmu_data_o
-    ,output          mmu_rd_o
-    ,output          mmu_wr_o
-    ,output  [ 3:0]  mmu_mask_o
-    ,output          mmu_dflush_o
-    ,output          mmu_dinvalidate_o
-    ,output          mmu_dwriteback_o
+    output [31:0]       mmu_addr_o,
+    output [31:0]       mmu_data_o,
+    output              mmu_rd_o,
+    output              mmu_wr_o,
+    output [3:0]        mmu_mask_o,
+    output              mmu_dflush_o,
+    output              mmu_dinvalidate_o,
+    output              mmu_dwriteback_o,
 
-    ,output  reg [31:0]  writeback_value_o
-    ,output          writeback_valid_o
+    output reg [31:0]   writeback_value_o,
+    output              writeback_valid_o,
 
-    ,output  [5:0]   exception_o
+    output [5:0]        exception_o
 );
 
 // --------------------------------------------
@@ -67,7 +63,7 @@ reg        mem_wr_r;
 reg [ 3:0] mem_mask_r;
 
 // Queue
-reg [ DATASIZE-1:0] data_q_i;
+reg [DATASIZE-1:0] data_q_i;
 
 // --------------------------------------------
 //  Wire Declaration
@@ -77,16 +73,16 @@ reg [ DATASIZE-1:0] data_q_i;
 wire [DATASIZE-1:0] resp_data_o;
 wire                resp_accept_o;
 wire                resp_valid_o;
-wire        [31:0]  resp_addr;
-wire        [31:0]  resp_data;
+wire         [31:0] resp_addr;
+wire         [31:0] resp_data;
 wire                resp_lb;
 wire                resp_lh;
 wire                resp_lw;
 wire                resp_signed;
 wire                resp_rd;
 wire                resp_wr;
-wire        [ 3:0]  resp_mask;
-wire        [ 2:0]  resp_u_type;
+wire         [ 3:0] resp_mask;
+wire         [ 2:0] resp_u_type;
 
 // --------------------------------------------
 //  Opcode 
@@ -126,7 +122,7 @@ reg unaligned_2_r;
 
 wire addr_unaligned = unaligned_1_r || unaligned_2_r;
 
-always @(*)begin
+always @(*) begin
     unaligned_1_r = 0;
     unaligned_2_r = 0;
 
@@ -155,8 +151,7 @@ reg [31:0] u_data;
 reg [2:0] u_type;
 
 always @(posedge clk_i or negedge rst_i)begin
-    if(!rst_i)
-    begin
+    if(!rst_i) begin
         u_state <= 0;
         u_rd <= 0;
         u_wr <= 0;
@@ -164,10 +159,8 @@ always @(posedge clk_i or negedge rst_i)begin
         u_sign <= 0;
         u_lh <= 0;
     end
-    else
-    begin
-        if(unaligned_1_r && (mem_addr_r[1:0] == 2'b11))
-        begin
+    else begin
+        if(unaligned_1_r && (mem_addr_r[1:0] == 2'b11)) begin
             u_state <= 1;
             u_rd <= ld_inst;
             u_wr <= st_inst;
@@ -177,8 +170,7 @@ always @(posedge clk_i or negedge rst_i)begin
             u_sign <= sign_inst;
             u_lh <= 1;
         end
-        else if(unaligned_2_r)
-        begin
+        else if(unaligned_2_r) begin
             u_state <= 1;
             u_rd <= ld_inst;
             u_wr <= st_inst;
@@ -194,8 +186,7 @@ always @(posedge clk_i or negedge rst_i)begin
             default:u_type <= 3'h0;
             endcase
         end
-        else
-        begin
+        else begin
             u_state <= 0;
             u_rd <= 0;
             u_wr <= 0;
@@ -222,7 +213,7 @@ assign mmu_mask_o   = (mmu_wr_o)?resp_mask: (mmu_rd_o)?4'hf: 4'h0;
 //  Input Address & Data Control
 // --------------------------------------------
 
-always @(*)begin
+always @(*) begin
     mem_rd_r = 0;
     mem_wr_r = 0;
     mem_mask_r = 0;
@@ -235,71 +226,69 @@ always @(*)begin
     mem_addr_r = ra_data + ex_mem_imm_i;
         
     // write setting
-    if (sw_inst || lw_inst)begin
+    if (sw_inst || lw_inst) begin
         case(mem_addr_r[1:0])
-        2'b11:   mem_data_wr_r = {rb_data[7:0],24'h000000};
-        2'b10:   mem_data_wr_r = {rb_data[15:0],16'h0000};
-        2'b01:   mem_data_wr_r = {rb_data[23:0],8'h00};
-        2'b00:   mem_data_wr_r = rb_data;
+            2'b11:   mem_data_wr_r = {rb_data[7:0],24'h000000};
+            2'b10:   mem_data_wr_r = {rb_data[15:0],16'h0000};
+            2'b01:   mem_data_wr_r = {rb_data[23:0],8'h00};
+            2'b00:   mem_data_wr_r = rb_data;
         endcase
 
         case(mem_addr_r[1:0])
-        2'b11: mem_mask_r = 4'b1000;
-        2'b10: mem_mask_r = 4'b1100;
-        2'b01: mem_mask_r = 4'b1110;
-        2'b00: mem_mask_r = 4'b1111;
+            2'b11: mem_mask_r = 4'b1000;
+            2'b10: mem_mask_r = 4'b1100;
+            2'b01: mem_mask_r = 4'b1110;
+            2'b00: mem_mask_r = 4'b1111;
         endcase
-    end else if (sh_inst || lh_inst)begin
+    end
+    else if (sh_inst || lh_inst) begin
         case(mem_addr_r[1:0])
-        2'b11:   mem_data_wr_r  = {rb_data[7:0],24'h0};
-        2'b10:   mem_data_wr_r  = {rb_data[15:0],16'h0000};
-        2'b01:   mem_data_wr_r  = {8'h00, rb_data[15:0], 8'h00};
-        2'b00:   mem_data_wr_r  = {16'h0000,rb_data[15:0]};
-        endcase
-
-        case(mem_addr_r[1:0])
-        2'b11:   mem_mask_r = 4'b1000;
-        2'b10:   mem_mask_r = 4'b1100;
-        2'b01:   mem_mask_r = 4'b0110;
-        2'b00:   mem_mask_r = 4'b0011;
-        endcase
-    end else if (sb_inst || lb_inst)begin
-        case(mem_addr_r[1:0])
-        2'b11:   mem_data_wr_r = {rb_data[7:0],24'h000000};
-        2'b10:   mem_data_wr_r = {{8'h00,rb_data[7:0]},16'h0000};
-        2'b01:   mem_data_wr_r = {{16'h0000,rb_data[7:0]},8'h00};
-        2'b00:   mem_data_wr_r = {24'h000000,rb_data[7:0]};
+            2'b11:   mem_data_wr_r  = {rb_data[7:0],24'h0};
+            2'b10:   mem_data_wr_r  = {rb_data[15:0],16'h0000};
+            2'b01:   mem_data_wr_r  = {8'h00, rb_data[15:0], 8'h00};
+            2'b00:   mem_data_wr_r  = {16'h0000,rb_data[15:0]};
         endcase
 
         case(mem_addr_r[1:0])
-        2'b11:   mem_mask_r = 4'b1000;
-        2'b10:   mem_mask_r = 4'b0100;
-        2'b01:   mem_mask_r = 4'b0010;
-        2'b00:   mem_mask_r = 4'b0001;
+            2'b11:   mem_mask_r = 4'b1000;
+            2'b10:   mem_mask_r = 4'b1100;
+            2'b01:   mem_mask_r = 4'b0110;
+            2'b00:   mem_mask_r = 4'b0011;
+        endcase
+    end
+    else if (sb_inst || lb_inst) begin
+        case(mem_addr_r[1:0])
+            2'b11:   mem_data_wr_r = {rb_data[7:0],24'h000000};
+            2'b10:   mem_data_wr_r = {{8'h00,rb_data[7:0]},16'h0000};
+            2'b01:   mem_data_wr_r = {{16'h0000,rb_data[7:0]},8'h00};
+            2'b00:   mem_data_wr_r = {24'h000000,rb_data[7:0]};
+        endcase
+
+        case(mem_addr_r[1:0])
+            2'b11:   mem_mask_r = 4'b1000;
+            2'b10:   mem_mask_r = 4'b0100;
+            2'b01:   mem_mask_r = 4'b0010;
+            2'b00:   mem_mask_r = 4'b0001;
         endcase
     end
 
 
-    if(u_type == 3'h1)
-    begin
+    if(u_type == 3'h1) begin
         mem_mask_r = 4'b0001;
         mem_data_wr_r = {24'h000000,u_data[15:8]};
         mem_addr_r = u_addr;
     end
-    else if(u_type == 3'h2)
-    begin
+    else if(u_type == 3'h2) begin
         mem_mask_r = 4'b0001;
         mem_data_wr_r = {24'h000000,u_data[31:24]};
         mem_addr_r = u_addr;
     end
-    else if(u_type == 3'h3)
-    begin
+    else if(u_type == 3'h3) begin
         mem_mask_r = 4'b0011;
         mem_data_wr_r = {16'h0000,u_data[31:16]};
         mem_addr_r = u_addr;
     end
-    else if(u_type == 3'h4)
-    begin
+    else if(u_type == 3'h4) begin
         mem_mask_r = 4'b0111;
         mem_data_wr_r = {8'h00,u_data[31:8]};
         mem_addr_r = u_addr;
@@ -367,20 +356,18 @@ reg        resp_valid_pre;
 assign writeback_valid_o = {resp_valid_pre, resp_valid_o} == 2'b10;
 
 always @(posedge clk_i or negedge rst_i) begin
-    if(!rst_i)
-    begin
+    if(!rst_i) begin
         writeback_value_o <= 32'h0;
         writeback_value_pre <= 32'h0;
         resp_valid_pre <= 0;
     end
-    else
-    begin
+    else begin
         case(resp_u_type)
-        3'h1: writeback_value_o <= {writeback_value_r[23:0], writeback_value_pre[ 7:0]};
-        3'h2: writeback_value_o <= {writeback_value_r[ 7:0], writeback_value_pre[23:0]};
-        3'h3: writeback_value_o <= {writeback_value_r[15:0], writeback_value_pre[15:0]};
-        3'h4: writeback_value_o <= {writeback_value_r[23:0], writeback_value_pre[ 7:0]};
-        default: writeback_value_o <= writeback_value_r; 
+            3'h1: writeback_value_o <= {writeback_value_r[23:0], writeback_value_pre[ 7:0]};
+            3'h2: writeback_value_o <= {writeback_value_r[ 7:0], writeback_value_pre[23:0]};
+            3'h3: writeback_value_o <= {writeback_value_r[15:0], writeback_value_pre[15:0]};
+            3'h4: writeback_value_o <= {writeback_value_r[23:0], writeback_value_pre[ 7:0]};
+            default: writeback_value_o <= writeback_value_r; 
         endcase
 
         resp_valid_pre <= resp_valid_o;
@@ -388,21 +375,21 @@ always @(posedge clk_i or negedge rst_i) begin
     end
 end
 
-always @(*)begin
+always @(*) begin
     writeback_value_r = 32'b0;
 
     case(resp_mask)
-    4'b0001: writeback_value_r = {24'b0, mmu_value_i[7:0]};
-    4'b0010: writeback_value_r = {24'b0, mmu_value_i[15:8]};
-    4'b0100: writeback_value_r = {24'b0, mmu_value_i[23:16]};
-    4'b1000: writeback_value_r = {24'b0, mmu_value_i[31:24]};
-    4'b0011: writeback_value_r = {16'b0, mmu_value_i[15:0]};
-    4'b0110: writeback_value_r = {16'b0, mmu_value_i[23:8]};
-    4'b1100: writeback_value_r = {16'b0, mmu_value_i[31:16]};
-    4'b0111: writeback_value_r = {8'b0, mmu_value_i[23:0]};
-    4'b1110: writeback_value_r = {8'b0, mmu_value_i[31:8]};
-    4'b1111: writeback_value_r = mmu_value_i;
-    default: writeback_value_r = 32'b0;
+        4'b0001: writeback_value_r = {24'b0, mmu_value_i[7:0]};
+        4'b0010: writeback_value_r = {24'b0, mmu_value_i[15:8]};
+        4'b0100: writeback_value_r = {24'b0, mmu_value_i[23:16]};
+        4'b1000: writeback_value_r = {24'b0, mmu_value_i[31:24]};
+        4'b0011: writeback_value_r = {16'b0, mmu_value_i[15:0]};
+        4'b0110: writeback_value_r = {16'b0, mmu_value_i[23:8]};
+        4'b1100: writeback_value_r = {16'b0, mmu_value_i[31:16]};
+        4'b0111: writeback_value_r = {8'b0, mmu_value_i[23:0]};
+        4'b1110: writeback_value_r = {8'b0, mmu_value_i[31:8]};
+        4'b1111: writeback_value_r = mmu_value_i;
+        default: writeback_value_r = 32'b0;
     endcase
 
     if(resp_signed && resp_lh && writeback_value_r[15])

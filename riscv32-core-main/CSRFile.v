@@ -38,36 +38,35 @@
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF 
 // SUCH DAMAGE.
 //-----------------------------------------------------------------
-/* verilator lint_off UNUSEDSIGNAL */
 `include "riscv_defs.v"
 
 module CSRFile (
-     input clk
-    ,input rst_n
+    input           clk,
+    input           rst_n,
     
-    ,input  [31:0]  cpu_id_i
-    ,input  [31:0]  misa_i
+    input  [31:0]   cpu_id_i,
+    input  [31:0]   misa_i,
 
-    ,input  [5:0]   exception_i
-    ,input  [31:0]  exception_pc_i
-    ,input  [31:0]  exception_addr_i
+    input  [5:0]    exception_i,
+    input  [31:0]   exception_pc_i,
+    input  [31:0]   exception_addr_i,
 
-    ,input  [11:0]  csr_rd_addr_i /* verilator public */
-    ,output [31:0]  csr_rd_data_o
+    input  [11:0]   csr_rd_addr_i /* verilator public */,
+    output [31:0]   csr_rd_data_o,
     
-    ,input          csr_wr_en_i
-    ,input  [11:0]  csr_wr_addr_i
-    ,input  [31:0]  csr_wr_data_i
+    input           csr_wr_en_i,
+    input  [11:0]   csr_wr_addr_i,
+    input  [31:0]   csr_wr_data_i,
 
-    ,output         csr_branch_o
-    ,output [31:0]  csr_target_o
+    output          csr_branch_o,
+    output [31:0]   csr_target_o,
 
     // CSR registers
-    ,output [1:0]   priv_o
-    ,output [31:0]  mstatus_o
-    ,output [31:0]  satp_o
+    output [1:0]    priv_o,
+    output [31:0]   mstatus_o,
+    output [31:0]   satp_o,
 
-    ,output [31:0]  interrupt_o
+    output [31:0]   interrupt_o
 );
 
 // utilities
@@ -171,7 +170,8 @@ reg [1:0] irq_priv_q;
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         irq_priv_q <= `PRIV_MACHINE;
-    end else if(| irq_masked_r)begin
+    end
+    else if(| irq_masked_r)begin
         irq_priv_q <= irq_priv_r;
     end
 end
@@ -362,25 +362,28 @@ always @(*) begin
                 csr_mcause_r = `MCAUSE_INTERRUPT + 32'd`IRQ_M_TIMER;
             else if (interrupt_o[`IRQ_M_EXT])
                 csr_mcause_r = `MCAUSE_INTERRUPT + 32'd`IRQ_M_EXT;
-        end else begin
+        end
+        else begin
             // placeholder for S mode interrupt handling
         end
-
+    end
     // Exception return
-    end else if (exception_i >= `EXCEPTION_ERET_U && exception_i <= `EXCEPTION_ERET_M) begin
+    else if (exception_i >= `EXCEPTION_ERET_U && exception_i <= `EXCEPTION_ERET_M) begin
         // mret
         if(exception_i[1:0] == `PRIV_MACHINE) begin
             // Restore previous level
-            csr_priv_r          = csr_mstatus_q[`SR_MPP_R];
+            csr_priv_r = csr_mstatus_q[`SR_MPP_R];
             csr_mstatus_r[`SR_MIE_R] = csr_mstatus_q[`SR_MPIE_R];
             csr_mstatus_r[`SR_MPIE_R] = 1'b1; // previous is enabled
             csr_mstatus_r[`SR_MPP_R] = `SR_MPP_M;
-        end else begin
-        // placeholder for sret handling
+        end
+        else begin
+            // placeholder for sret handling
         end
     // TODO: need to implement s mode exception handling
     // Exception - Machine
-    end else if((exception_i & `EXCEPTION_TYPE_MASK) == `EXCEPTION_EXCEPTION) begin
+    end
+    else if((exception_i & `EXCEPTION_TYPE_MASK) == `EXCEPTION_EXCEPTION) begin
         csr_mstatus_r[`SR_MPIE_R] = csr_mstatus_r[`SR_MIE_R];
         csr_mstatus_r[`SR_MPP_R]  = csr_priv_q;
         csr_mstatus_r[`SR_MIE_R]  = 1'b0;
@@ -403,11 +406,13 @@ always @(*) begin
             default:                        csr_mtval_r = 32'b0;
         endcase
 
+    end
     // FPU flag write-in
-    end else if(exception_i == `EXCEPTION_FPU) begin
+    else if(exception_i == `EXCEPTION_FPU) begin
         csr_fflags_r = csr_wr_data_i & `CSR_FFLAGS_MASK;
+    end
     // normal write operation WL
-    end else if(csr_wr_en_i) begin
+    else if(csr_wr_en_i) begin
         case(csr_wr_addr_i)
         // CSR - Machine
             // Trap Setup
@@ -425,8 +430,7 @@ always @(*) begin
             // Floating Point
             `CSR_FFLAGS:  csr_fflags_r    = csr_wr_data_i & `CSR_FFLAGS_MASK;
             `CSR_FRM:     csr_frm_r       = csr_wr_data_i & `CSR_FRM_MASK;
-            `CSR_FCSR:
-            begin
+            `CSR_FCSR: begin
                 csr_fflags_r = csr_wr_data_i & `CSR_FFLAGS_MASK;
                 csr_frm_r    = (csr_wr_data_i >> 5) & `CSR_FRM_MASK;
             end
@@ -435,8 +439,7 @@ always @(*) begin
             `CSR_SERIAL_IO_OUT: csr_serial_io_out_r = csr_wr_data_i;
             `CSR_SERIAL_IO_IN: csr_serial_io_in_r = csr_wr_data_i;
             // Non-Standard Timer Interrupt
-            `CSR_MTIMECMP:
-            begin
+            `CSR_MTIMECMP: begin
                 csr_mtimecmp_r = csr_wr_data_i & `CSR_MTIMECMP_MASK;
                 csr_mtime_ie_r = 1'b1;
             end
@@ -499,7 +502,8 @@ always @(posedge clk or negedge rst_n) begin
         // CSR - Supervisor
             // SATP
         csr_satp_q     <= 32'b0;
-    end else begin
+    end
+    else begin
         // CSR - Machine
             // privilege level
         csr_priv_q     <= csr_priv_r;
@@ -537,7 +541,6 @@ always @(posedge clk or negedge rst_n) begin
         // CSR - Supervisor
             // SATP
         csr_satp_q     <= csr_satp_r & `CSR_SATP_MASK;
-
     end
 end
 
@@ -552,7 +555,7 @@ always @(*) begin
     csr_target_r = 32'b0;
 
     // Interrupt
-    if(exception_i == `EXCEPTION_INTERRUPT)begin
+    if(exception_i == `EXCEPTION_INTERRUPT) begin
         csr_branch_r = 1'b1;
         // TODO: need to implement s mode check
         csr_target_r = csr_mtvec_q;
