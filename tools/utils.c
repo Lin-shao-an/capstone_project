@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <math.h>
 
 void printf(char *format, ...) {
     char *idx;
@@ -7,14 +8,16 @@ void printf(char *format, ...) {
     bool zero_padding_checked = false;
     bool is_zero_padded = false;
     bool is_left_aligned = false;
+    bool is_float_format = false;
     uint8_t field_width = 0;
+    uint8_t precision = 0;
 
     uint8_t arg_char_counter = 0;
 
     va_list ap;
     va_start(ap, format);
 
-    for (idx = format; *idx != NULL; idx++) {
+    for (idx = format; *idx != '\0'; idx++) {
         if (is_special_code) {
 
             if (*idx == '-') {
@@ -32,8 +35,18 @@ void printf(char *format, ...) {
 
             if (*idx >= '0' && *idx <= '9') {
                 // Handle the width
-                field_width = field_width * 10 + (*idx - '0');
+                if (!is_float_format) {
+                    field_width = field_width * 10 + (*idx - '0');
+                }
+                else {
+                    precision = precision * 10 + (*idx - '0');
+                }
                 zero_padding_checked = true;
+                continue;
+            }
+
+            if (*idx == '.') {
+                is_float_format = true;
                 continue;
             }
 
@@ -136,13 +149,19 @@ void printf(char *format, ...) {
                 
                 if (arg_val == 0) {
                     num_str[num_idx++] = '0'; // Handle zero
-                } else {
+                }
+                else {
+                    if (arg_val < 0) {
+                        // Handle INT32_MIN case
+                        num_str[num_idx++] = '8';
+                        arg_val = 214748364; // INT32_MIN is -2147483648
+                    }
                     while (arg_val > 0) {
                         num_str[num_idx++] = (arg_val % 10) + '0';
                         arg_val /= 10;
                     }
                 }
-
+                
                 // Print digits in reverse order
                 int i;
                 if (is_neg && is_zero_padded) {
@@ -166,6 +185,114 @@ void printf(char *format, ...) {
                 }
                 if (field_width && is_left_aligned) {
                     for (i = field_width - 1 - is_neg; i >= num_idx; i--) {
+                        serial_putc(' ');
+                    }
+                }
+
+                is_special_code = false;
+                continue;
+            }
+            else if (*idx == 'f' || *idx == 'F') {
+                float arg_val = (float)va_arg(ap, double);
+
+                if (!is_float_format) {
+                    precision = 6; // Default precision
+                }
+
+                bool neg = false;
+                if (arg_val < 0.0f) {
+                    neg = true;
+                    arg_val = -arg_val;
+                }
+
+                char integer_part[39];
+                int fractional_part[150]; // At most 150 digits for fractional part
+                int i, j;
+
+                for (i = 0; i < 39; i++) {
+                    integer_part[i] = 0;
+                }
+                for (i = 0; i < 150; i++) {
+                    fractional_part[i] = 0;
+                }
+
+                // Integer part
+                int int_idx = 0;
+                uint32_t int_val = (uint32_t)arg_val;
+                if (int_val == 0) {
+                    integer_part[int_idx++] = 0;
+                }
+                else {
+                    while (int_val > 0 && int_idx < 39) {
+                        integer_part[int_idx++] = (int_val % 10);
+                        int_val /= 10;
+                    }
+                }
+
+                if (precision > 149) {
+                    precision = 149;
+                }
+
+                // Fractional part
+                float frac = arg_val - (float)((uint32_t)arg_val);
+                for (i = 0; i <= precision; i++) {
+                    frac *= 10.0f;
+                    fractional_part[i] = (int)frac;
+                    frac -= (int)frac;
+                }
+
+                // Rounding
+                if (precision > 0) {
+                    if (fractional_part[precision] >= 5) {
+                        int carry = 1;
+                        for (i = precision - 1; i >= 0 && carry; i--) {
+                            int temp = fractional_part[i] + carry;
+                            fractional_part[i] = temp % 10;
+                            carry = temp / 10;
+                        }
+                        for (i = 0; carry; i++) {
+                            int temp = integer_part[i] + carry;
+                            integer_part[i] = temp % 10;
+                            carry = temp / 10;
+                        }
+                    }
+                }
+
+                int int_digit = int_idx - 1;
+                while (int_digit > 0 && integer_part[int_digit] == 0) int_digit--;
+
+                if (neg && is_zero_padded) {
+                    serial_putc('-');
+                }
+                if (field_width && !is_left_aligned) {
+                    for (i = 0; i < field_width - (int_digit + 1 + (precision > 0 ? (precision + 1) : 0) + neg); i++) {
+                        if (is_zero_padded) {
+                            serial_putc('0');
+                        }
+                        else {
+                            serial_putc(' ');
+                        }
+                    }
+                }
+                if (neg && !is_zero_padded) {
+                    serial_putc('-');
+                }
+
+                for (i = int_digit; i >= 0; i--) {
+                    serial_putc(integer_part[i] + '0');
+                }
+
+                if (precision > 0) {
+                    serial_putc('.');
+                    for (i = 0; i < precision; i++) {
+                        int digit = fractional_part[i] % 10;
+                        if (digit < 0) digit = 0;
+                        serial_putc(digit + '0');
+                    }
+                }
+
+                if (field_width && is_left_aligned) {
+                    for (i = 0; i < field_width - (int_digit + 1 + (precision > 0 ? (precision + 1) : 0) + neg); i++) {
                         serial_putc(' ');
                     }
                 }

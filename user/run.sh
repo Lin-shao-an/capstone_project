@@ -28,7 +28,7 @@ riscv32-unknown-elf-gcc \
     -std=gnu89 \
     -ffreestanding \
     -Wreturn-type \
-    -o $file_name.elf ../tools/start.s ../tools/utils.h ../tools/utils.c ../tools/serial.s $file_name.c
+    -o $file_name.elf ../tools/start.s ../tools/types.h ../tools/utils.h ../tools/utils.c ../tools/serial.s $file_name.c
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error: Compilation failed for $file_name.c.${RESET}"
